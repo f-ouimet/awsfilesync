@@ -15,42 +15,39 @@ import(
 //} 
 
 
-func main(){
+func uploadFile(bucket, key, filePath string) error{
   region := "us-east-2"
 
   sess, err := session.NewSession(&aws.Config{
     Region: aws.String(region),
   })
   if err != nil {
-    fmt.Println("Error creating session:", err)
-    return
+    return fmt.Errorf("Error creating session:", err)
+    
   }
   client := s3.New(sess)
-
-  bucket := "ouimetfelixfilestorage"
-  filePath := "test.txt"
 
   _, err = client.HeadBucket(&s3.HeadBucketInput{
     Bucket: aws.String(bucket),
   })
   if err != nil{
-    fmt.Println("Failed to access bucket:", err)
+    return fmt.Errorf("Failed to access bucket:", err)
   }
 
   fmt.Println("Bucket Reached!")
 
   file, err := os.Open(filePath)
   if err != nil{
-    fmt.Fprintln(os.Stderr, "Error opening file:", err)
-    return
+    return fmt.Errorf("Error opening file:", err)
+    
   }
   defer file.Close()
 
-  key := "filetest/test.txt"
+  
   var buf bytes.Buffer
   if _, err := io.Copy(&buf, file); err != nil{
-    fmt.Fprintln(os.Stderr, "Error reading file:", err)
-    return
+    return fmt.Errorf("Error reading file:", err)
+    
   }
 
   _, err = client.PutObject(&s3.PutObjectInput{
@@ -59,10 +56,11 @@ func main(){
     Body:   bytes.NewReader(buf.Bytes()),
   })
   if err != nil{
-    fmt.Println("Error uploading file:", err)
-    return
+    return fmt.Errorf("Error uploading file:", err)
+    
   }
 
   fmt.Println("Upload successful!")
+  return nil
 
 }
