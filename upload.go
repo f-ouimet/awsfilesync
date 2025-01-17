@@ -5,7 +5,8 @@ import(
   "fmt"
   "io"
   "os"
-
+  "path/filepath"
+  
   "github.com/aws/aws-sdk-go/aws"
   "github.com/aws/aws-sdk-go/aws/session"
   "github.com/aws/aws-sdk-go/service/s3"
@@ -63,4 +64,25 @@ func uploadFile(bucket, key, filePath string) error{
   fmt.Println("Upload successful!")
   return nil
 
+}
+
+func uploadFolder(bucket, folderPath, prefix string) error{
+  return filepath.Walk(folderPath, func(path string, info os.FileInfo, err error) error{
+    if err != nil{
+      return fmt.Errorf("error walking folder path %q : %v", path, err)
+    }
+
+    if info.IsDir(){
+      return nil
+    }
+
+    relativePath, err := filepath.Rel(folderPath, path)
+    if err != nil{
+      return fmt.Errorf("error getting relative path: %v", err)
+    }
+    s3Key := filepath.ToSlash(filepath.Join(prefix, relativePath))
+
+    fmt.Printf("Uploading %s to %s %s \n", path, bucket, s3Key)
+    return uploadFile(bucket, s3Key, path)
+  })
 }
