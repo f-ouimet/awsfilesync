@@ -52,7 +52,7 @@ func main(){
     fmt.Println("Upload file successful")
     }
   case "down":
-    if *key == "" || strings.HasSuffix(*key, "/"){
+    if strings.HasSuffix(*key, "/"){
       fmt.Printf("Downloading folder from bucket %s with prefix %s to %s...\n", *bucket, *key, *filePath)
       err := downloadFolder(*bucket, *key, *filePath)
       if err != nil{

@@ -27,6 +27,6 @@ go.work.sum
 #test txt file
 *.txt
 
-./build/*.*
+./build/*
 ./test/
 ./test/*
